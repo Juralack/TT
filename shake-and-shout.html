@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ทดสอบพลังคู่ — เขย่า + ตะโกน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#230C10;
+    --bg-mid:#3A1218;
+    --gold:#D9A441;
+    --gold-bright:#F2C766;
+    --cream:#F2E6CC;
+    --ember:#E2532E;
+    --success:#4E9F63;
+    --bulb-off:#4a2a26;
+    --line:rgba(242,230,204,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 50% -10%, var(--bg-mid) 0%, var(--bg-deep) 55%, #150608 100%);
+    color:var(--cream);
+    font-family:'Kanit',sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px 16px 60px;
+    overflow-x:hidden;
+  }
+  .marquee-frame{
+    width:100%;
+    max-width:560px;
+    border:3px solid var(--gold);
+    border-radius:18px;
+    padding:22px 20px 30px;
+    background:linear-gradient(180deg, rgba(242,230,204,0.04), transparent 40%);
+    box-shadow:0 0 0 6px rgba(217,164,65,0.08), 0 20px 60px rgba(0,0,0,0.5);
+    position:relative;
+  }
+  .marquee-frame::before, .marquee-frame::after{
+    content:"";
+    position:absolute;
+    width:10px;height:10px;
+    border-radius:50%;
+    background:var(--gold);
+    box-shadow:0 0 8px var(--gold-bright);
+    top:10px;
+  }
+  .marquee-frame::before{left:10px;}
+  .marquee-frame::after{right:10px;}
+
+  .eyebrow{
+    text-align:center;
+    letter-spacing:0.28em;
+    font-size:11px;
+    color:var(--gold);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    text-align:center;
+    font-size:clamp(30px, 8vw, 44px);
+    letter-spacing:0.02em;
+    margin:0 0 6px;
+    color:var(--gold-bright);
+    text-shadow:0 2px 0 rgba(0,0,0,0.4), 0 0 24px rgba(217,164,65,0.25);
+    line-height:1.05;
+  }
+  .sub{
+    text-align:center;
+    font-size:14px;
+    color:rgba(242,230,204,0.75);
+    max-width:420px;
+    margin:0 auto 22px;
+    line-height:1.55;
+  }
+  .sub b{color:var(--gold-bright); font-weight:600;}
+
+  /* --- tower layout --- */
+  .rig{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:14px;
+    align-items:end;
+    margin:18px 0 10px;
+  }
+  .gauge-col{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .gauge-label{font-size:12px; letter-spacing:0.08em; color:var(--gold); text-transform:uppercase;}
+  .gauge-track{
+    width:34px; height:220px;
+    border-radius:17px;
+    background:rgba(0,0,0,0.35);
+    border:2px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .gauge-fill{
+    position:absolute; bottom:0; left:0; right:0;
+    height:0%;
+    border-radius:0 0 15px 15px;
+    transition:height 90ms linear;
+  }
+  #shakeFill{background:linear-gradient(180deg, #F2C766, var(--ember));}
+  #soundFill{background:linear-gradient(180deg, #7fd9a0, var(--success));}
+  .gauge-value{font-family:'Anton',sans-serif; font-size:15px; color:var(--cream);}
+
+  .tower-col{display:flex; flex-direction:column; align-items:center;}
+  .bell{
+    font-size:28px;
+    margin-bottom:6px;
+    filter:drop-shadow(0 0 0 transparent);
+    transition:transform 120ms ease, filter 200ms ease;
+  }
+  .bell.ring{
+    animation:ringShake 0.5s ease;
+    filter:drop-shadow(0 0 14px var(--gold-bright));
+  }
+  @keyframes ringShake{
+    0%,100%{transform:rotate(0deg);}
+    20%{transform:rotate(-18deg);}
+    40%{transform:rotate(14deg);}
+    60%{transform:rotate(-10deg);}
+    80%{transform:rotate(6deg);}
+  }
+  .bulb-ladder{
+    display:flex;
+    flex-direction:column-reverse;
+    gap:6px;
+    padding:10px 8px;
+    border-radius:12px;
+    background:rgba(0,0,0,0.25);
+    border:2px solid var(--line);
+  }
+  .bulb{
+    width:20px; height:20px;
+    border-radius:50%;
+    background:var(--bulb-off);
+    box-shadow:inset 0 0 4px rgba(0,0,0,0.6);
+    transition:background 120ms ease, box-shadow 120ms ease;
+  }
+  .bulb.lit{
+    background:var(--gold-bright);
+    box-shadow:0 0 10px var(--gold-bright), 0 0 22px rgba(242,199,102,0.6);
+  }
+  .bulb.lit.top{
+    background:var(--ember);
+    box-shadow:0 0 12px var(--ember), 0 0 26px rgba(226,83,46,0.7);
+  }
+  .power-readout{
+    font-family:'Anton',sans-serif;
+    font-size:15px;
+    margin-top:8px;
+    color:var(--gold-bright);
+  }
+
+  .stats{
+    display:flex;
+    justify-content:center;
+    gap:26px;
+    margin:18px 0 8px;
+    font-size:13px;
+    color:rgba(242,230,204,0.8);
+  }
+  .stats .num{
+    font-family:'Anton',sans-serif;
+    font-size:20px;
+    display:block;
+    color:var(--gold-bright);
+  }
+
+  .controls{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    margin-top:16px;
+  }
+  button{
+    font-family:'Kanit',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:12px 28px;
+    border-radius:999px;
+    border:2px solid var(--gold);
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#2A1206;
+    cursor:pointer;
+    letter-spacing:0.02em;
+  }
+  button:active{transform:translateY(1px);}
+  button:disabled{opacity:0.5; cursor:default;}
+  button.secondary{
+    background:transparent;
+    color:var(--cream);
+    border-color:var(--line);
+  }
+  .status{
+    text-align:center;
+    font-size:12.5px;
+    min-height:18px;
+    color:rgba(242,230,204,0.65);
+  }
+  .status.err{color:#f2a6a6;}
+
+  .footnote{
+    max-width:520px;
+    margin-top:26px;
+    font-size:12.5px;
+    line-height:1.7;
+    color:rgba(242,230,204,0.6);
+    border-top:1px dashed var(--line);
+    padding-top:16px;
+  }
+  .footnote b{color:var(--gold);}
+  .footnote code{
+    background:rgba(0,0,0,0.3);
+    padding:1px 6px;
+    border-radius:4px;
+    font-size:11.5px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .bell.ring{animation:none;}
+    .gauge-fill{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="marquee-frame">
+  <div class="eyebrow">Special Topic 1 · เว็บคุยกับ Hardware</div>
+  <h1>ทดสอบพลังคู่<br>เขย่า + ตะโกน</h1>
+  <p class="sub">
+    เครื่องทดสอบพลังสไตล์งานวัด — <b>เขย่ามือถือ</b> วัดด้วย Accelerometer
+    และ <b>ตะโกนใส่ไมค์</b> วัดด้วย Microphone พลังรวมจะเกิดขึ้นได้
+    ก็ต่อเมื่อทำ <b>พร้อมกันทั้งสองอย่าง</b> เท่านั้น
+  </p>
+
+  <div class="rig">
+    <div class="gauge-col">
+      <div class="gauge-label">เขย่า</div>
+      <div class="gauge-track"><div class="gauge-fill" id="shakeFill"></div></div>
+      <div class="gauge-value" id="shakeVal">0%</div>
+    </div>
+
+    <div class="tower-col">
+      <div class="bell" id="bell">🔔</div>
+      <div class="bulb-ladder" id="ladder"></div>
+      <div class="power-readout" id="powerReadout">พลังรวม 0%</div>
+    </div>
+
+    <div class="gauge-col">
+      <div class="gauge-label">ตะโกน</div>
+      <div class="gauge-track"><div class="gauge-fill" id="soundFill"></div></div>
+      <div class="gauge-value" id="soundVal">0%</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div>พลังสูงสุด<span class="num" id="peakStat">0%</span></div>
+    <div>สั่นระฆังได้<span class="num" id="ringStat">0</span></div>
+  </div>
+
+  <div class="controls">
+    <button id="startBtn">เริ่มเกม (ขออนุญาตเซ็นเซอร์)</button>
+    <button id="resetBtn" class="secondary" disabled>รีเซ็ตคะแนน</button>
+    <div class="status" id="status">ต้องใช้มือถือที่มีเซ็นเซอร์การเคลื่อนไหวและไมโครโฟน</div>
+  </div>
+
+  <div class="footnote">
+    <b>เซ็นเซอร์ที่ใช้:</b> Accelerometer ผ่าน <code>DeviceMotionEvent</code>
+    (วัดความแรงในการเขย่า) และ Microphone ผ่าน <code>Web Audio API</code>
+    (วัดระดับความดังของเสียง)<br><br>
+    <b>วิธีทำงานร่วมกัน:</b> พลังรวม = ระดับแรงเขย่า × ระดับความดังเสียง
+    (ทั้งสองค่าอยู่ในช่วง 0–1) ถ้าถอดเซ็นเซอร์ตัวใดตัวหนึ่งออก
+    ค่าตัวนั้นจะเป็น 0 เสมอ และพลังรวมจะเป็น 0 ตามไปด้วย — ต้องมีทั้งสองตัว
+    ทำงานพร้อมกันจริง ๆ เกจถึงจะขึ้นและระฆังถึงจะดังได้
+  </div>
+</div>
+
+<script>
+(function(){
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const statusEl = document.getElementById('status');
+  const shakeFill = document.getElementById('shakeFill');
+  const soundFill = document.getElementById('soundFill');
+  const shakeVal = document.getElementById('shakeVal');
+  const soundVal = document.getElementById('soundVal');
+  const powerReadout = document.getElementById('powerReadout');
+  const peakStat = document.getElementById('peakStat');
+  const ringStat = document.getElementById('ringStat');
+  const bell = document.getElementById('bell');
+  const ladder = document.getElementById('ladder');
+
+  const BULB_COUNT = 10;
+  for(let i=0;i<BULB_COUNT;i++){
+    const b = document.createElement('div');
+    b.className = 'bulb' + (i === BULB_COUNT-1 ? ' top' : '');
+    ladder.appendChild(b);
+  }
+  const bulbs = Array.from(ladder.children);
+
+  let shakeRaw = 0;      // instantaneous shake magnitude
+  let shakeSmoothed = 0; // rolling normalized 0..1
+  let soundSmoothed = 0; // rolling normalized 0..1
+  let peakPower = 0;
+  let ringCount = 0;
+  let lastRingTime = 0;
+  let running = false;
+
+  let audioCtx, analyser, dataArray, micStream;
+  let prevAcc = null;
+
+  function setStatus(msg, isErr){
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (isErr ? ' err' : '');
+  }
+
+  function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+
+  // ---- Accelerometer handling ----
+  function handleMotion(e){
+    const acc = e.acceleration && (e.acceleration.x || e.acceleration.y || e.acceleration.z)
+      ? e.acceleration
+      : e.accelerationIncludingGravity;
+    if(!acc) return;
+    const x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
+    if(prevAcc){
+      const dx = x - prevAcc.x, dy = y - prevAcc.y, dz = z - prevAcc.z;
+      const jerk = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      shakeRaw = Math.max(shakeRaw, jerk);
+    }
+    prevAcc = {x, y, z};
+  }
+
+  // ---- Microphone handling ----
+  async function startMic(){
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(micStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024;
+    dataArray = new Uint8Array(analyser.fftSize);
+    source.connect(analyser);
+  }
+
+  function getSoundLevel(){
+    if(!analyser) return 0;
+    analyser.getByteTimeDomainData(dataArray);
+    let sumSquares = 0;
+    for(let i=0;i<dataArray.length;i++){
+      const v = (dataArray[i] - 128) / 128;
+      sumSquares += v*v;
+    }
+    const rms = Math.sqrt(sumSquares / dataArray.length);
+    // typical speaking/shouting rms roughly 0.02 - 0.35, scale up
+    return clamp01(rms * 3.2);
+  }
+
+  // ---- Bell sound ----
+  function playDing(){
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 0.4);
+    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.6);
+  }
+
+  // ---- Main loop ----
+  function loop(){
+    if(!running) return;
+
+    const shakeNorm = clamp01(shakeRaw / 22); // empirical scale
+    shakeSmoothed += (shakeNorm - shakeSmoothed) * 0.25;
+    shakeRaw *= 0.75; // decay so a single spike doesn't stick forever
+
+    const soundNorm = getSoundLevel();
+    soundSmoothed += (soundNorm - soundSmoothed) * 0.35;
+
+    const power = clamp01(shakeSmoothed * soundSmoothed * 1.6);
+
+    shakeFill.style.height = (shakeSmoothed*100).toFixed(0) + '%';
+    soundFill.style.height = (soundSmoothed*100).toFixed(0) + '%';
+    shakeVal.textContent = Math.round(shakeSmoothed*100) + '%';
+    soundVal.textContent = Math.round(soundSmoothed*100) + '%';
+    powerReadout.textContent = 'พลังรวม ' + Math.round(power*100) + '%';
+
+    const litCount = Math.round(power * BULB_COUNT);
+    bulbs.forEach((b, i) => b.classList.toggle('lit', i < litCount));
+
+    if(power > peakPower){
+      peakPower = power;
+      peakStat.textContent = Math.round(peakPower*100) + '%';
+    }
+
+    const now = performance.now();
+    if(power >= 0.9 && now - lastRingTime > 1500){
+      lastRingTime = now;
+      ringCount++;
+      ringStat.textContent = ringCount;
+      bell.classList.remove('ring');
+      void bell.offsetWidth;
+      bell.classList.add('ring');
+      playDing();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  async function start(){
+    startBtn.disabled = true;
+    setStatus('กำลังขออนุญาตเซ็นเซอร์...');
+    try{
+      if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+        const res = await DeviceMotionEvent.requestPermission();
+        if(res !== 'granted') throw new Error('ไม่ได้รับอนุญาตให้ใช้ Motion');
+      }
+      window.addEventListener('devicemotion', handleMotion);
+
+      await startMic();
+
+      running = true;
+      resetBtn.disabled = false;
+      setStatus('พร้อมแล้ว! เขย่ามือถือพร้อมตะโกนใส่ไมค์ ⚡');
+      requestAnimationFrame(loop);
+    }catch(err){
+      setStatus('ผิดพลาด: ' + err.message + ' (ต้องเปิดผ่าน HTTPS และอนุญาตสิทธิ์)', true);
+      startBtn.disabled = false;
+    }
+  }
+
+  function reset(){
+    peakPower = 0;
+    ringCount = 0;
+    peakStat.textContent = '0%';
+    ringStat.textContent = '0';
+    bulbs.forEach(b => b.classList.remove('lit'));
+  }
+
+  startBtn.addEventListener('click', start);
+  resetBtn.addEventListener('click', reset);
+})();
+</script>
+</body>
+</html>
